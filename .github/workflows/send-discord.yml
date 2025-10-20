@@ -1,0 +1,24 @@
+name: Send periodic message to Discord
+
+on:
+  schedule:
+    - cron: '*/10 * * * *' # roda a cada 10 minutos
+  workflow_dispatch: # permite rodar manualmente
+
+jobs:
+  post-to-discord:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Send message via curl
+        env:
+          WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK }}
+          NICK: "BersksAuto"
+          PLAYERS: "5"
+          LINK: "https://hkdk.events/w83hamue5mkffw"
+        run: |
+          payload=$(jq -n \
+            --arg username "$NICK" \
+            --arg content "Nick: $NICK\nPlayers: $PLAYERS\nLink: $LINK" \
+            '{username: $username, content: $content}')
+          curl -sSL -H "Content-Type: application/json" \
+            -d "$payload" "$WEBHOOK_URL"
